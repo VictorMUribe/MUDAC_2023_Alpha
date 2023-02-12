@@ -1,0 +1,33 @@
+---
+title: "Github Setup"
+author: "Victor M. Uribe"
+date: "2023-02-12"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Go to Github
+
+| Using [github](https://github.com) go to your profile on the top right of the page and then go to Developer settings which then you should click "tokens (classic)" and click "generate new token". It will ask you for how long should the token last. Here you typically want 3 months.
+
+
+\[\text{github} \rightarrow settings \rightarrow \text{Developer settings} \rightarrow \text{tokens (classic)} \rightarrow \text{Generate new token} \]
+
+From here you copy it and then proceed to rstudios once you have all of it up to date. 
+
+Then you want to create a new project/connect to existing
+
+
+
+
+
+```{r}
+# install.packages("gitcreds") # install in terminal first
+# library(gitcreds)
+# gitcreds_set() # enter your github token 
+```
