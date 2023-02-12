@@ -20,14 +20,23 @@ knitr::opts_chunk$set(echo = TRUE)
 
 From here you copy it and then proceed to rstudios once you have all of it up to date. 
 
-Then you want to create a new project/connect to existing
-
-
-
-
-
 ```{r}
 # install.packages("gitcreds") # install in terminal first
 # library(gitcreds)
-# gitcreds_set() # enter your github token 
+# gitcreds_set() # enter your github token that you copied
 ```
+
+After this your github account and rstudios should be linked 
+
+
+
+
+
+
+
+
+
+
+
+
+
