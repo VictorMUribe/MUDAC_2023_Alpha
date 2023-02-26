@@ -1,0 +1,72 @@
+---
+title: "Victor's File"
+author: "Victor M. Uribe"
+date: "2023-02-12"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+```{r}
+library(data.table)
+library(tidyverse)
+library(tidymodels)
+library(timetk)
+library(modeltime)
+```
+
+```{r}
+Original_Schedules %>% 
+  names()
+```
+
+
+
+```{r}
+Original_Schedules <- OrignialSchedules_OriginalSchedules %>% 
+  janitor::clean_names()
+
+
+cleaned_data <- Original_Schedules %>% 
+  mutate(
+     date = lubridate::ymd(date),
+     dateof_makeup = lubridate::ymd(dateof_makeup),
+     dayof_week = factor(dayof_week),
+     visiting_team = factor(visiting_team),
+     visiting_team_league = factor(visiting_team_league),
+     home_team = factor(home_team),
+     home_team_league = factor(home_team_league),
+     day_night = factor(day_night),
+     postponement_cancellation_reason = factor(postponement_cancellation_reason)
+  )
+  
+
+cleaned_data %>% 
+  glimpse()
+```
+
+
+
+
+
+```{r}
+cleaned_data %>% 
+```
+
+
+
+
+
+
+
+
+
+
+
+
