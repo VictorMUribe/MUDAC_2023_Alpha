@@ -59,6 +59,5 @@ cat <- lapply(game_logs, is.character) %>%
 data.frame(game_logs[,..cat]) %>% 
   unique()
 
-game
 
 
