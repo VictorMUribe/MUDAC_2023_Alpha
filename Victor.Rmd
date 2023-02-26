@@ -1,0 +1,36 @@
+---
+title: "Victor's File"
+author: "Victor M. Uribe"
+date: "2022-02-25"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r include=FALSE}
+library(tidyverse)
+library(tidymodels)
+```
+
+
+
+
+
+# feature Selection
+
+```{r}
+lasso_spec <- linear_reg()
+```
+
+
+
+
+
+
+
+

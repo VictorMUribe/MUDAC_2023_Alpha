@@ -61,6 +61,3 @@ data.frame(game_logs[,..cat]) %>%
 
 
 
-
-
-
