@@ -61,3 +61,31 @@ data.frame(game_logs[,..cat]) %>%
 
 
 
+set.seed(123)
+GameLogs <- data.table::fread("~/Documents/GameLogs.csv") %>% 
+  sample_n(10000) %>% 
+  janitor::clean_names()
+
+GameLogs %>% 
+  glimpse()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
