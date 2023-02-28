@@ -1,0 +1,100 @@
+---
+title: "LSTM FIT"
+author: "Victor M. Uribe"
+date: "2023-01-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidymodels)
+library(keras)
+library(timetk)
+```
+
+
+
+
+
+```{r}
+
+# create a recipe for pre-processing the data
+lstm_rec <- recipe(Sepal.Length ~ ., data = train_data) %>%
+  step_normalize(all_predictors()) %>%
+  step_timeseries_signature(
+    Sepal.Width,
+    Petal.Length,
+    Petal.Width,
+    sequence_length = 5,
+    skip = 1
+  ) %>%
+  step_rm(Species)
+
+```
+
+
+```{r}
+
+# create the LSTM model
+lstm_model <- function(units, dropout_rate, learning_rate) {
+  model <- keras_model_sequential() %>%
+    layer_lstm(units = units, input_shape = c(5, 3), dropout = dropout_rate) %>%
+    layer_dense(units = 1)
+  
+  optimizer <- optimizer_adam(learning_rate = learning_rate)
+  
+  model %>% compile(
+    loss = "mse",
+    optimizer = optimizer,
+    metrics = list("mae")
+  )
+  
+  return(model)
+}
+
+# create the tidymodels workflow
+lstm_wf <- workflow() %>%
+  add_recipe(lstm_rec) %>%
+  add_model(lstm_model)
+
+
+```
+
+
+
+
+```{r}
+doParallel::registerDoParallel()
+set.seed(123)
+
+# create the parameter grid
+lstm_params <- parameter_set(
+  parameter_int("units", value = 16, lower = 8, upper = 32),
+  parameter_double("dropout_rate", value = 0.2, lower = 0, upper = 0.5),
+  parameter_double("learning_rate", value = 0.001, lower = 0.0001, upper = 0.01, trans = "log")
+)
+
+# define the search strategy
+lstm_grid <- grid_latin_hypercube(lstm_params, size = 10, dim = 3)
+
+# tune the model
+lstm_tuned <- tune_grid(
+  lstm_wf,
+  resamples = vfold_cv(train_data, v = 5),
+  grid = lstm_grid,
+  metrics = metric_set(mae),
+  control = control_grid(verbose = TRUE)
+)
+
+# get the best parameters and fit the final model
+best_params <- select_best(lstm_tuned, "mae")
+final_fit <- finalize_workflow(lstm_wf %>% update_model(lstm_model(best_params)))
+```
+
+
+
+
