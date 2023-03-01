@@ -12,7 +12,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 
-```{r include=FALSE}
+
+
+
+```{r}
 library(tidyverse)
 library(tidymodels)
 ```
@@ -38,6 +41,7 @@ lasso_wf <- workflow() %>%
   add_model(lasso_spec) %>% 
   add_recipe(lasso_rec)
 ```
+
 
 
 
