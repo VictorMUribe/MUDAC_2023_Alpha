@@ -63,13 +63,37 @@ data.frame(game_logs[,..cat]) %>%
 
 set.seed(123)
 GameLogs <- data.table::fread("~/Documents/GameLogs.csv") %>% 
-  sample_n(10000) %>% 
-  janitor::clean_names()
+  sample_n(500) %>% 
+  select(-contains("ID")) %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    date = lubridate::ymd(date),
+  )
+
+
+
+not_num <- function(col){
+  !is.numeric(col)
+} 
+
+cat %>%  select_if(GameLogs, not_num)
+
+
+GameLogs[,select_if(GameLogs, not_num)] <- lapply(GameLogs[,select_if(GameLogs, not_num)], factor)
+
+
 
 GameLogs %>% 
   glimpse()
 
 
+
+set.seed(123)
+gamelog_split <- initial_split(GameLogs, strata = attendance)
+gamelog_train <- training(gamelog_split)
+gamelog_test <- testing(gamelog_split)
+
+gamelog_fold <- vfold_cv(gamelog_train, v = 10)
 
 
 
