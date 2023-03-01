@@ -35,7 +35,7 @@ lasso_spec <- linear_reg(penalty = tune(), mixture = 1) %>%
 lasso_rec <- recipe(attendance ~., gamelog_train) %>% 
   step_normalize(all_numeric_predictors()) %>% 
   step_other(all_nominal_predictors(), threshold = .05) %>% 
-  step_dummy(all_nominal())
+  step_dummy(all_nominal_predictors())
 
 lasso_wf <- workflow() %>% 
   add_model(lasso_spec) %>% 
