@@ -1,0 +1,144 @@
+---
+title: "Lasso Fit"
+author: "Victor M. Uribe"
+date: "2022-02-25"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+```
+
+
+
+
+
+# feature Selection
+
+```{r}
+lasso_spec <- linear_reg(penalty = tune(), mixture = 1) %>% 
+  set_engine("glmnet") %>% 
+  set_mode("regression")
+
+
+lasso_rec <- recipe(attendance ~., gamelog_train) %>% 
+  step_normalize(all_numeric_predictors()) %>% 
+  step_impute_mean(attendance, skip = TRUE) %>%
+  step_other(all_nominal_predictors()) %>% 
+  step_dummy(all_nominal())
+
+lasso_wf <- workflow() %>% 
+  add_model(lasso_spec) %>% 
+  add_recipe(lasso_rec)
+```
+
+
+
+
+
+```{r}
+doParallel::registerDoParallel()
+set.seed(123)
+
+lambda_grid <- grid_regular(
+  penalty(),
+  levels = 25
+)
+lasso_tune <- tune_grid(
+  lasso_wf,
+  resamples = gamelog_fold,
+  grid = lambda_grid
+)
+
+```
+
+
+```{r}
+lasso_tune %>% autoplot()
+```
+
+
+
+```{r}
+doParallel::registerDoParallel()
+
+best_lambda <- lasso_tune %>% 
+  select_best("rmse")
+fin_lass_wf <- finalize_workflow(
+  lasso_wf,
+  best_lambda
+)
+
+fit_lass <- fin_lass_wf %>% 
+  fit(gamelog_train)
+
+
+fit_lass %>% 
+  tidy() %>% 
+  filter(estimate == 0)
+```
+
+
+
+```{r}
+doParallel::registerDoParallel()
+last_fit(
+  fit_lass,
+  gamelog_split
+) %>% 
+  collect_metrics()
+```
+
+
+1 rmse    standard   10274.    Preprocessor1_Model1
+2 rsq     standard       0.166 Preprocessor1_Model1
+
+ rmse    standard   10131.    Preprocessor1_Model1
+2 rsq     standard       0.191 Preprocessor1_Model1
+
+
+```{r}
+lass_spec <- linear_reg(penalty = 20, mixture = 1) %>% 
+  set_engine("glmnet") %>% 
+  set_mode("regression")
+
+lass <- lasso_wf %>% 
+  remove_model() %>% 
+  add_model(lass_spec)
+
+
+lass_fit <- lass %>% 
+  fit(gamelog_train) 
+
+
+lass_fit %>% 
+  tidy() %>% 
+  filter(estimate == 0)
+
+```
+
+
+```{r}
+pred <- predict(lass_fit, new_data = gamelog_test)
+
+c <- ( (gamelog_test$attendance - pred)^2 )
+mse <- lapply(c, mean, na.rm = TRUE)
+(rmse <- sqrt(mse$.pred))
+```
+
+
+
+
+
+
