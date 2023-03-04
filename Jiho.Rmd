@@ -1,0 +1,226 @@
+---
+title: "Jiho"
+author: "Jiho Jeong"
+date: "2023-03-04"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+for(i in 60:65) {
+  colnames(gamelog_train)[i] %>%  print()
+  gamelog_train[[i]] %>% table() %>% print()
+}
+```
+
+
+
+
+
+```{r}
+for(i in 60:65) {
+  gamelog_train[[i]] %>% hist(main=colnames(gamelog_train)[i])
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+for(i in 66:70) {
+  colnames(gamelog_train)[i] %>%  print()
+  gamelog_train[[i]] %>% table() %>% print()
+}
+```
+
+```{r}
+for(i in 71:76) {
+  colnames(gamelog_train)[i] %>%  print()
+  gamelog_train[[i]] %>% table() %>% print()
+}
+```
+
+
+```{r}
+for(i in 77:85) {
+  colnames(gamelog_train)[i] %>%  print()
+  gamelog_train[[i]] %>% table() %>% print()
+}
+```
+
+```{r}
+for(i in 86:89) {
+  colnames(gamelog_train)[i] %>%  print()
+  gamelog_train[[i]] %>% table() %>% print()
+}
+```
+
+
+
+
+
+
+```{r}
+library(modeltime)
+library(timetk)
+library(lubridate)
+library(tidyverse)
+library(tidymodels)
+
+
+dat_2021 <- GameLogs %>% 
+  filter_by_time(date, "2021-01-01","2022-01-01")
+
+
+```
+
+
+```{r}
+
+set.seed(123)# note that 2:119 removes the dates
+gamelog_split_time <- initial_split(GameLogs, strata = attendance)
+gamelog_train_time <- training(gamelog_split_time)
+gamelog_test_time <- testing(gamelog_split_time)
+gamelog_fold_time <- vfold_cv(gamelog_train_time, v = 10)
+
+
+```
+
+```{r}
+# Model 1: auto_arima ----
+model_fit_arima_no_boost <- arima_reg() %>%
+    set_engine(engine = "auto_arima") %>%
+    fit(attendance ~ date, data = gamelog_train_time)
+#> frequency = 12 observations per 1 year
+```
+
+```{r}
+# Model 2: arima_boost ----
+model_fit_arima_boosted <- arima_boost(
+    min_n = 2,
+    learn_rate = 0.015
+) %>%
+    set_engine(engine = "auto_arima_xgboost") %>%
+    fit(attendance ~ date + as.numeric(date) + factor(month(date, label = TRUE), ordered = F),
+        data = gamelog_train_time)
+#> frequency = 12 observations per 1 year
+```
+
+
+```{r}
+models_tbl <- modeltime_table(
+    model_fit_arima_no_boost,
+    model_fit_arima_boosted
+)
+models_tbl
+```
+
+```{r}
+calibration_tbl <- models_tbl %>%
+    modeltime_calibrate(new_data = gamelog_test_time)
+
+calibration_tbl
+```
+
+```{r}
+calibration_tbl %>%
+    modeltime_forecast(
+        new_data    = gamelog_test_time,
+        actual_data = GameLogs
+    ) %>%
+    plot_modeltime_forecast(
+      .legend_max_width = 25, # For mobile screens
+      .interactive = FALSE
+    )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+calibration_tbl %>%
+    modeltime_accuracy() %>%
+    table_modeltime_accuracy(
+        .interactive = F
+    )
+```
+
+
+
+
+
+22364.07
+
+
+22354.13
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
